@@ -29,7 +29,7 @@ local ClientUpdate = ReplicatedStorage:WaitForChild("ClientUpdate")
 -- 1. CONFIGURACIÓN DE SONIDOS 
 --------------------------------------------------------------------------------
  
--- Roblox Asset IDs para los sonidos
+-- Roblox Asset IDs para los sonidos - SONIDOS DE TERROR INTENSOS
 local SOUND_IDS = {
 -- 1. Música de Fondo del Intro (Bucle) - MÚSICA ÉPICA DE TERROR
 IntroMusic = "rbxassetid://1838645651", 
@@ -47,6 +47,15 @@ UnknownEnter = "rbxassetid://130976109",
 Like = "rbxassetid://17520503095",
 -- 8. Efecto de Glitch para la intro
 GlitchSound = "rbxassetid://9114397505",
+-- 9. NUEVOS SONIDOS TERRORÍFICOS
+Heartbeat = "rbxassetid://131961136", -- Latidos del corazón acelerados
+Whisper = "rbxassetid://131961136", -- Susurros perturbadores
+Scream = "rbxassetid://131961136", -- Grito de terror
+StaticNoise = "rbxassetid://131961136", -- Ruido estático
+Footsteps = "rbxassetid://131961136", -- Pasos acercándose
+Breathing = "rbxassetid://131961136", -- Respiración pesada
+DoorCreak = "rbxassetid://131961136", -- Puerta chirriando
+PhoneRing = "rbxassetid://131961136", -- Teléfono sonando siniestro
 }
  
 -- ARREGLO DE SONIDO: Se adjunta SoundFolder a PlayerGui para mayor fiabilidad
@@ -68,6 +77,25 @@ for name, id in pairs(SOUND_IDS) do
         sound.Volume = 0.8
     elseif name == "GlitchSound" then
         sound.Volume = 0.6
+    elseif name == "Heartbeat" then
+        sound.Volume = 0.9
+        sound.Looped = true
+    elseif name == "Whisper" then
+        sound.Volume = 0.5
+    elseif name == "Scream" then
+        sound.Volume = 1.0
+    elseif name == "StaticNoise" then
+        sound.Volume = 0.3
+        sound.Looped = true
+    elseif name == "Footsteps" then
+        sound.Volume = 0.8
+    elseif name == "Breathing" then
+        sound.Volume = 0.7
+        sound.Looped = true
+    elseif name == "DoorCreak" then
+        sound.Volume = 0.6
+    elseif name == "PhoneRing" then
+        sound.Volume = 0.9
     else
         sound.Volume = 1.0
     end
@@ -340,7 +368,7 @@ local function screenDistortion()
         end)
     end
     
-    -- Función para crear flash rojo de terror
+    -- Función para crear flash rojo de terror MEJORADO
     local function terrorFlash()
         local flash = Instance.new("Frame")
         flash.Size = UDim2.new(1, 0, 1, 0)
@@ -359,15 +387,144 @@ local function screenDistortion()
         end)
     end
     
+    -- NUEVA FUNCIÓN: Efecto de ojos que aparecen
+    local function createEyesEffect()
+        local eyesFrame = Instance.new("Frame")
+        eyesFrame.Size = UDim2.new(1, 0, 1, 0)
+        eyesFrame.BackgroundTransparency = 1
+        eyesFrame.ZIndex = 150
+        eyesFrame.Parent = ScreenGui
+        
+        for i = 1, 3 do
+            local eye = Instance.new("TextLabel")
+            eye.Size = UDim2.new(0, 60, 0, 60)
+            eye.Position = UDim2.new(math.random(10, 90)/100, 0, math.random(10, 90)/100, 0)
+            eye.Text = "👁️"
+            eye.TextSize = 50
+            eye.BackgroundTransparency = 1
+            eye.TextTransparency = 1
+            eye.ZIndex = 151
+            eye.Parent = eyesFrame
+            
+            -- Aparecer gradualmente
+            task.spawn(function()
+                for j = 1, 20 do
+                    eye.TextTransparency = 1 - (j / 20)
+                    task.wait(0.05)
+                end
+                task.wait(2)
+                for j = 1, 20 do
+                    eye.TextTransparency = j / 20
+                    task.wait(0.05)
+                end
+            end)
+        end
+        
+        Debris:AddItem(eyesFrame, 5)
+    end
+    
+    -- NUEVA FUNCIÓN: Texto que aparece y desaparece
+    local function createGhostText(message)
+        local ghostText = Instance.new("TextLabel")
+        ghostText.Size = UDim2.new(1, 0, 0.2, 0)
+        ghostText.Position = UDim2.new(0, 0, math.random(20, 60)/100, 0)
+        ghostText.Text = message
+        ghostText.TextColor3 = Color3.fromRGB(255, 0, 0)
+        ghostText.TextSize = 36
+        ghostText.Font = Enum.Font.SourceSansBold
+        ghostText.BackgroundTransparency = 1
+        ghostText.TextTransparency = 1
+        ghostText.TextStrokeTransparency = 0.5
+        ghostText.TextStrokeColor3 = Color3.fromRGB(0, 0, 0)
+        ghostText.ZIndex = 200
+        ghostText.Parent = ScreenGui
+        
+        task.spawn(function()
+            -- Aparecer
+            for i = 1, 15 do
+                ghostText.TextTransparency = 1 - (i / 15)
+                ghostText.Position = ghostText.Position + UDim2.new(0, math.random(-5, 5), 0, math.random(-2, 2))
+                task.wait(0.05)
+            end
+            task.wait(1.5)
+            -- Desaparecer
+            for i = 1, 15 do
+                ghostText.TextTransparency = i / 15
+                task.wait(0.05)
+            end
+            ghostText:Destroy()
+        end)
+    end
+    
+    -- NUEVA FUNCIÓN: Efecto de interferencia de pantalla
+    local function createStaticInterference()
+        local staticFrame = Instance.new("Frame")
+        staticFrame.Size = UDim2.new(1, 0, 1, 0)
+        staticFrame.BackgroundColor3 = Color3.fromRGB(255, 255, 255)
+        staticFrame.BackgroundTransparency = 0.8
+        staticFrame.ZIndex = 120
+        staticFrame.Parent = ScreenGui
+        
+        playSound("StaticNoise")
+        
+        task.spawn(function()
+            for i = 1, 20 do
+                staticFrame.BackgroundTransparency = 0.8 + math.random(-20, 20)/100
+                staticFrame.BackgroundColor3 = Color3.fromRGB(
+                    math.random(200, 255),
+                    math.random(200, 255), 
+                    math.random(200, 255)
+                )
+                task.wait(0.05)
+            end
+            sounds.StaticNoise:Stop()
+            staticFrame:Destroy()
+        end)
+    end
+    
     local function addMessage(senderName, messageText)
         local isMe = (senderName == Player.Name)
         local isUnknown = (senderName == "Desconocido")
         local timestamp = os.date("%H:%M")
         
-        -- Efectos especiales si es el Desconocido
+        -- Efectos especiales INTENSOS si es el Desconocido
         if isUnknown then
             screenDistortion()
             terrorFlash()
+            
+            -- NUEVOS EFECTOS TERRORÍFICOS
+            local randomEffect = math.random(1, 6)
+            
+            if randomEffect == 1 then
+                createEyesEffect()
+                playSound("Whisper")
+            elseif randomEffect == 2 then
+                createGhostText("TE ESTOY VIENDO")
+                playSound("Breathing")
+            elseif randomEffect == 3 then
+                createStaticInterference()
+            elseif randomEffect == 4 then
+                playSound("Heartbeat")
+                createGhostText("TU CORAZÓN LATE MUY RÁPIDO")
+            elseif randomEffect == 5 then
+                playSound("Footsteps")
+                createGhostText("PASOS... CADA VEZ MÁS CERCA")
+            else
+                playSound("DoorCreak")
+                createEyesEffect()
+            end
+            
+            -- Efecto adicional: hacer que el fondo parpadee MÁS INTENSO
+            task.spawn(function()
+                local originalColor = MainFrame.BackgroundColor3
+                for i = 1, 8 do -- Más parpadeos
+                    MainFrame.BackgroundColor3 = Color3.fromRGB(math.random(20, 40), 0, 0)
+                    task.wait(0.08)
+                    MainFrame.BackgroundColor3 = Color3.fromRGB(0, 0, 0)
+                    task.wait(0.08)
+                end
+                MainFrame.BackgroundColor3 = originalColor
+            end)
         end
         
         -- 1. Marco contenedor del mensaje (ocupa el 100% del ancho del Scroller)
@@ -715,30 +872,63 @@ local function screenDistortion()
     RoomsBack.MouseButton1Click:Connect(function() switchScreen("Intro") end) 
         Instance.new("UICorner", RoomsBack).CornerRadius = UDim.new(0, 10)
         
+        local HeaderFrame = Instance.new("Frame")
+        HeaderFrame.Size = UDim2.new(1, 0, 0.15, 0)
+        HeaderFrame.Position = UDim2.new(0, 0, 0.05, 0)
+        HeaderFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+        HeaderFrame.BorderSizePixel = 0
+        HeaderFrame.Parent = RoomSelectScreen
+        Instance.new("UICorner", HeaderFrame).CornerRadius = UDim.new(0, 10)
+        
         local WaitingLabel = Instance.new("TextLabel")
         WaitingLabel.Name = "WaitingLabel"
-        WaitingLabel.Size = UDim2.new(1, 0, 0.1, 0)
-        WaitingLabel.Position = UDim2.new(0.5, 0, 0.05, 0)
-        WaitingLabel.AnchorPoint = Vector2.new(0.5, 0)
-        WaitingLabel.Text = "SALAS DISPONIBLES (Desliza para ver)"
-        WaitingLabel.TextColor3 = TEXT_COLOR
-        WaitingLabel.TextSize = 24
-        WaitingLabel.TextWrapped = true
+        WaitingLabel.Size = UDim2.new(0.7, 0, 0.6, 0)
+        WaitingLabel.Position = UDim2.new(0.05, 0, 0.2, 0)
+        WaitingLabel.Text = "🏠 SALAS DE TERROR DISPONIBLES"
+        WaitingLabel.TextColor3 = Color3.fromRGB(255, 100, 100)
+        WaitingLabel.TextSize = 22
+        WaitingLabel.Font = Enum.Font.SourceSansBold
         WaitingLabel.BackgroundTransparency = 1
-        WaitingLabel.TextXAlignment = Enum.TextXAlignment.Center
-        WaitingLabel.TextYAlignment = Enum.TextYAlignment.Center
-        WaitingLabel.Parent = RoomSelectScreen
+        WaitingLabel.TextXAlignment = Enum.TextXAlignment.Left
+        WaitingLabel.Parent = HeaderFrame
+        
+        local RefreshButton = Instance.new("TextButton")
+        RefreshButton.Name = "RefreshButton"
+        RefreshButton.Size = UDim2.new(0.25, 0, 0.6, 0)
+        RefreshButton.Position = UDim2.new(0.7, 0, 0.2, 0)
+        RefreshButton.Text = "🔄 ACTUALIZAR"
+        RefreshButton.BackgroundColor3 = ACCENT_COLOR
+        RefreshButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        RefreshButton.TextSize = 16
+        RefreshButton.Font = Enum.Font.SourceSansBold
+        RefreshButton.Parent = HeaderFrame
+        Instance.new("UICorner", RefreshButton).CornerRadius = UDim.new(0, 8)
+        
+        RefreshButton.MouseButton1Click:Connect(function()
+            RefreshButton.Text = "🔄 Actualizando..."
+            RoomListRequest:FireServer()
+            task.wait(1)
+            RefreshButton.Text = "🔄 ACTUALIZAR"
+        end)
         
         local RoomScroller = Instance.new("ScrollingFrame")
         RoomScroller.Name = "RoomScroller"
-        RoomScroller.Size = UDim2.new(0.9, 0, 0.7, 0)
-        RoomScroller.Position = UDim2.new(0.5, 0, 0.5, 0)
+        RoomScroller.Size = UDim2.new(0.95, 0, 0.65, 0)
+        RoomScroller.Position = UDim2.new(0.5, 0, 0.48, 0)
         RoomScroller.AnchorPoint = Vector2.new(0.5, 0.5)
-        RoomScroller.BackgroundColor3 = Color3.fromRGB(20, 20, 20)
+        RoomScroller.BackgroundColor3 = Color3.fromRGB(18, 18, 18)
         RoomScroller.CanvasSize = UDim2.new(0, 0, 0, 0)
         RoomScroller.ScrollBarImageColor3 = ACCENT_COLOR
+        RoomScroller.ScrollBarThickness = 8
         RoomScroller.Parent = RoomSelectScreen
-        Instance.new("UICorner", RoomScroller).CornerRadius = UDim.new(0, 10)
+        Instance.new("UICorner", RoomScroller).CornerRadius = UDim.new(0, 12)
+        
+        local ScrollerPadding = Instance.new("UIPadding")
+        ScrollerPadding.PaddingTop = UDim.new(0, 15)
+        ScrollerPadding.PaddingBottom = UDim.new(0, 15)
+        ScrollerPadding.PaddingLeft = UDim.new(0, 15)
+        ScrollerPadding.PaddingRight = UDim.new(0, 15)
+        ScrollerPadding.Parent = RoomScroller
         
         local RoomLayout = Instance.new("UIListLayout")
         RoomLayout.Name = "RoomLayout"
@@ -746,18 +936,41 @@ local function screenDistortion()
         RoomLayout.Padding = UDim.new(0, 10)
         RoomLayout.Parent = RoomScroller
         
+        local ButtonFrame = Instance.new("Frame")
+        ButtonFrame.Size = UDim2.new(1, 0, 0.12, 0)
+        ButtonFrame.Position = UDim2.new(0, 0, 0.88, 0)
+        ButtonFrame.BackgroundTransparency = 1
+        ButtonFrame.Parent = RoomSelectScreen
+        
         local CreateRoomButton = Instance.new("TextButton")
         CreateRoomButton.Name = "CreateRoomButton"
-        CreateRoomButton.Size = UDim2.new(0.6, 0, 0.08, 0)
-        CreateRoomButton.Position = UDim2.new(0.5, 0, 0.93, 0)
-        CreateRoomButton.AnchorPoint = Vector2.new(0.5, 0.5)
-        CreateRoomButton.Text = "CREAR NUEVA SALA"
-        CreateRoomButton.BackgroundColor3 = ACCENT_COLOR
+        CreateRoomButton.Size = UDim2.new(0.45, 0, 0.7, 0)
+        CreateRoomButton.Position = UDim2.new(0.05, 0, 0.15, 0)
+        CreateRoomButton.Text = "🏠 CREAR SALA"
+        CreateRoomButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
         CreateRoomButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-        CreateRoomButton.TextSize = 24
+        CreateRoomButton.TextSize = 20
         CreateRoomButton.Font = Enum.Font.SourceSansBold
-        CreateRoomButton.Parent = RoomSelectScreen
-        Instance.new("UICorner", CreateRoomButton).CornerRadius = UDim.new(0, 10)
+        CreateRoomButton.Parent = ButtonFrame
+        Instance.new("UICorner", CreateRoomButton).CornerRadius = UDim.new(0, 12)
+        
+        local QuickJoinButton = Instance.new("TextButton")
+        QuickJoinButton.Name = "QuickJoinButton"
+        QuickJoinButton.Size = UDim2.new(0.45, 0, 0.7, 0)
+        QuickJoinButton.Position = UDim2.new(0.5, 0, 0.15, 0)
+        QuickJoinButton.Text = "⚡ UNIÓN RÁPIDA"
+        QuickJoinButton.BackgroundColor3 = Color3.fromRGB(100, 0, 100)
+        QuickJoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
+        QuickJoinButton.TextSize = 20
+        QuickJoinButton.Font = Enum.Font.SourceSansBold
+        QuickJoinButton.Parent = ButtonFrame
+        Instance.new("UICorner", QuickJoinButton).CornerRadius = UDim.new(0, 12)
+        
+        QuickJoinButton.MouseButton1Click:Connect(function()
+            QuickJoinButton.Text = "⚡ Buscando..."
+            QuickJoinButton.Active = false
+            RoomAction:FireServer("QuickJoin")
+        end)
         
         CreateRoomButton.MouseButton1Click:Connect(function()
             CreateRoomButton.Text = "Creando..."
@@ -766,7 +979,7 @@ local function screenDistortion()
         end)
         
         
-        -- Función para dibujar las salas
+        -- Función para dibujar las salas MEJORADA
         local function updateRoomList(roomsTable)
             for _, child in pairs(RoomScroller:GetChildren()) do
                 if child:IsA("Frame") and child.Name == "RoomEntry" then
@@ -775,53 +988,115 @@ local function screenDistortion()
             end
             
             if #roomsTable == 0 then
-                WaitingLabel.Text = "No hay salas disponibles.\n¡Sé el primero en crear una!"
+                local emptyFrame = Instance.new("Frame")
+                emptyFrame.Name = "EmptyFrame"
+                emptyFrame.Size = UDim2.new(1, 0, 0, 200)
+                emptyFrame.BackgroundColor3 = Color3.fromRGB(25, 25, 25)
+                emptyFrame.Parent = RoomScroller
+                Instance.new("UICorner", emptyFrame).CornerRadius = UDim.new(0, 15)
+                
+                local emptyIcon = Instance.new("TextLabel")
+                emptyIcon.Size = UDim2.new(1, 0, 0.4, 0)
+                emptyIcon.Text = "👻"
+                emptyIcon.TextSize = 60
+                emptyIcon.BackgroundTransparency = 1
+                emptyIcon.Parent = emptyFrame
+                
+                local emptyText = Instance.new("TextLabel")
+                emptyText.Size = UDim2.new(1, 0, 0.6, 0)
+                emptyText.Position = UDim2.new(0, 0, 0.4, 0)
+                emptyText.Text = "No hay salas disponibles\n¡Sé el primero en crear una sala de terror!"
+                emptyText.TextColor3 = Color3.fromRGB(150, 150, 150)
+                emptyText.TextSize = 18
+                emptyText.TextWrapped = true
+                emptyText.BackgroundTransparency = 1
+                emptyText.Parent = emptyFrame
+                
+                WaitingLabel.Text = "🏠 NO HAY SALAS ACTIVAS"
             else
-                WaitingLabel.Text = "SALAS DISPONIBLES (Desliza para ver)"
+                WaitingLabel.Text = "🏠 SALAS DE TERROR DISPONIBLES (" .. #roomsTable .. ")"
             end
             
-            for _, roomData in ipairs(roomsTable) do
+            for i, roomData in ipairs(roomsTable) do
                 local roomEntry = Instance.new("Frame")
                 roomEntry.Name = "RoomEntry"
-                roomEntry.Size = UDim2.new(1, 0, 0, 60)
-                roomEntry.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
+                roomEntry.Size = UDim2.new(1, 0, 0, 80)
+                roomEntry.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
                 roomEntry.Parent = RoomScroller
-                Instance.new("UICorner", roomEntry).CornerRadius = UDim.new(0, 8)
+                Instance.new("UICorner", roomEntry).CornerRadius = UDim.new(0, 12)
+                
+                -- Efecto hover
+                roomEntry.MouseEnter:Connect(function()
+                    roomEntry.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+                end)
+                roomEntry.MouseLeave:Connect(function()
+                    roomEntry.BackgroundColor3 = Color3.fromRGB(35, 35, 35)
+                end)
+                
+                local RoomIcon = Instance.new("TextLabel")
+                RoomIcon.Size = UDim2.new(0, 50, 0, 50)
+                RoomIcon.Position = UDim2.new(0, 15, 0.5, 0)
+                RoomIcon.AnchorPoint = Vector2.new(0, 0.5)
+                RoomIcon.Text = "🏚️"
+                RoomIcon.TextSize = 30
+                RoomIcon.BackgroundTransparency = 1
+                RoomIcon.Parent = roomEntry
+                
+                local InfoFrame = Instance.new("Frame")
+                InfoFrame.Size = UDim2.new(0.5, 0, 1, 0)
+                InfoFrame.Position = UDim2.new(0, 75, 0, 0)
+                InfoFrame.BackgroundTransparency = 1
+                InfoFrame.Parent = roomEntry
                 
                 local HostName = Instance.new("TextLabel")
-                HostName.Size = UDim2.new(0.7, -10, 1, 0)
-                HostName.Position = UDim2.new(0, 10, 0, 0)
-                HostName.AnchorPoint = Vector2.new(0, 0)
-                HostName.Text = "Sala de: " .. roomData.HostName
-                HostName.TextColor3 = TEXT_COLOR
-                HostName.TextSize = 20
+                HostName.Size = UDim2.new(1, 0, 0.5, 0)
+                HostName.Text = "👤 Host: " .. roomData.HostName
+                HostName.TextColor3 = Color3.fromRGB(255, 200, 200)
+                HostName.TextSize = 18
                 HostName.Font = Enum.Font.SourceSansBold
                 HostName.BackgroundTransparency = 1
                 HostName.TextXAlignment = Enum.TextXAlignment.Left
-                HostName.Parent = roomEntry
+                HostName.Parent = InfoFrame
+                
+                local RoomStatus = Instance.new("TextLabel")
+                RoomStatus.Size = UDim2.new(1, 0, 0.5, 0)
+                RoomStatus.Position = UDim2.new(0, 0, 0.5, 0)
+                RoomStatus.Text = "🟢 Esperando jugador..."
+                RoomStatus.TextColor3 = Color3.fromRGB(100, 255, 100)
+                RoomStatus.TextSize = 14
+                RoomStatus.BackgroundTransparency = 1
+                RoomStatus.TextXAlignment = Enum.TextXAlignment.Left
+                RoomStatus.Parent = InfoFrame
                 
                 local JoinButton = Instance.new("TextButton")
-                JoinButton.Size = UDim2.new(0.25, 0, 0.8, 0)
-                JoinButton.Position = UDim2.new(1, -10, 0.5, 0)
+                JoinButton.Size = UDim2.new(0.25, 0, 0.6, 0)
+                JoinButton.Position = UDim2.new(1, -15, 0.5, 0)
                 JoinButton.AnchorPoint = Vector2.new(1, 0.5)
-                JoinButton.Text = "UNIRSE"
-                JoinButton.BackgroundColor3 = ACCENT_COLOR
+                JoinButton.Text = "👻 ENTRAR"
+                JoinButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
                 JoinButton.TextColor3 = Color3.fromRGB(255, 255, 255)
-                JoinButton.TextSize = 18
-                JoinButton.Font = FONT_STYLE
+                JoinButton.TextSize = 16
+                JoinButton.Font = Enum.Font.SourceSansBold
                 JoinButton.Parent = roomEntry
-                Instance.new("UICorner", JoinButton).CornerRadius = UDim.new(0, 6)
+                Instance.new("UICorner", JoinButton).CornerRadius = UDim.new(0, 8)
+                
+                -- Efecto hover del botón
+                JoinButton.MouseEnter:Connect(function()
+                    JoinButton.BackgroundColor3 = Color3.fromRGB(200, 0, 0)
+                end)
+                JoinButton.MouseLeave:Connect(function()
+                    JoinButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
+                end)
                 
                 JoinButton.MouseButton1Click:Connect(function()
-                    JoinButton.Text = "Uniéndose..."
+                    JoinButton.Text = "👻 Entrando..."
                     JoinButton.Active = false
                     RoomAction:FireServer("Join", roomData.Id)
-                    -- El botón se reactivará si el switchScreen a "Chat" o "Intro" (en caso de error) ocurre.
                 end)
             end
             
             -- Ajustar CanvasSize para el ScrollingFrame
-            RoomScroller.CanvasSize = UDim2.new(0, 0, 0, RoomLayout.AbsoluteContentSize.Y + 10)
+            RoomScroller.CanvasSize = UDim2.new(0, 0, 0, RoomLayout.AbsoluteContentSize.Y + 30)
         end
         
         -- ** 5.3. Profile Screen Setup **
@@ -1243,16 +1518,22 @@ local function screenDistortion()
                             elseif senderName == "Desconocido" then
                                 playSound("UnknownEnter")
                                 
-                                -- Efecto adicional: hacer que el fondo parpadee
-                                task.spawn(function()
-                                    local originalColor = MainFrame.BackgroundColor3
-                                    for i = 1, 3 do
-                                        MainFrame.BackgroundColor3 = Color3.fromRGB(25, 0, 0)
-                                        task.wait(0.1)
-                                        MainFrame.BackgroundColor3 = originalColor
-                                        task.wait(0.1)
-                                    end
-                                end)
+                                -- EFECTOS ADICIONALES TERRORÍFICOS
+                                local terrorEffect = math.random(1, 4)
+                                
+                                if terrorEffect == 1 then
+                                    playSound("Scream")
+                                    createGhostText("¡NO PUEDES ESCAPAR!")
+                                elseif terrorEffect == 2 then
+                                    playSound("PhoneRing")
+                                    createStaticInterference()
+                                elseif terrorEffect == 3 then
+                                    playSound("Heartbeat")
+                                    createEyesEffect()
+                                else
+                                    playSound("Whisper")
+                                    createGhostText("ESTOY AQUÍ...")
+                                end
                             else
                                 playSound("MessageReceived")
                             end

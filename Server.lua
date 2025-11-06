@@ -46,7 +46,7 @@ local PlayerRoomMap = {}
 -- { [PlayerId1] = PlayerId2, [PlayerId2] = PlayerId1 } (Ambos son UserIds)
 local ActiveSessions = {} 
 
--- Lista de mensajes de terror para el "Desconocido"
+-- Lista de mensajes de terror para el "Desconocido" - MÁS TERRORÍFICOS
 local UnknownMessages = {
 "¿Están seguros de que son solo ustedes dos? Miren bien el chat.",
 "Les dije que no debían iniciar ese chat. Ahora es muy tarde.",
@@ -57,6 +57,27 @@ local UnknownMessages = {
 "No te fíes del silencio. Nunca es silencio.",
 "Deja de escribir. Cierra el chat. AHORA.",
 "¿Ves esa sombra detrás de ti?",
+"TU DIRECCIÓN ES [REDACTED]. ESTOY EN CAMINO.",
+"¿Por qué sigues escribiendo? ¿No escuchas los pasos?",
+"La puerta de tu habitación... ¿la cerraste con llave?",
+"Mira por la ventana. ¿Ves esa figura?",
+"Tu compañero ya no está. SOY YO quien responde ahora.",
+"3... 2... 1... Voltea.",
+"¿Sientes esa respiración en tu cuello?",
+"El chat nunca termina. NUNCA PODRÁS SALIR.",
+"Tu nombre real es... espera, ya lo sé.",
+"¿Escuchas esos susurros? Vienen de tu teléfono.",
+"DETRÁS DE TI. AHORA MISMO. NO VOLTEES.",
+"La batería de tu dispositivo... se está agotando rápido.",
+"¿Oíste ese ruido? Viene de tu casa.",
+"Tu compañero dejó de escribir hace 10 minutos. ¿Con quién crees que hablas?",
+"Revisa debajo de tu cama. YA.",
+"El espejo de tu habitación... algo se mueve en él.",
+"¿Por qué tiemblan tus manos al escribir?",
+"Cierra los ojos. Cuenta hasta 10. Cuando los abras, estaré ahí.",
+"Tu ubicación: ENCONTRADA. Tu miedo: CONFIRMADO.",
+"¿Escuchas tu propio corazón? Late demasiado rápido.",
+"NO APAGUES EL DISPOSITIVO. Eso me molesta."
 }
 
 --------------------------------------------------------------------------------
@@ -149,7 +170,60 @@ RoomAction.OnServerEvent:Connect(function(player, action, roomId)
         return 
     end
     
-    if action == "Create" then
+    if action == "QuickJoin" then
+        -- Buscar la primera sala disponible y unirse automáticamente
+        local availableRoom = nil
+        for id, room in pairs(Rooms) do
+            if room.Status == "Waiting" and room.HostId ~= userId and Players:GetPlayerByUserId(room.HostId) then
+                availableRoom = {id = id, room = room}
+                break
+            end
+        end
+        
+        if availableRoom then
+            -- Unirse a la primera sala disponible
+            local room = availableRoom.room
+            local roomId = availableRoom.id
+            
+            room.GuestId = userId
+            room.GuestName = playerName
+            room.Status = "Chatting"
+            PlayerRoomMap[userId] = roomId
+            
+            local partner = Players:GetPlayerByUserId(room.HostId)
+            
+            if partner then
+                print(string.format("[SERVER] QUICK JOIN en %s: %s y %s", roomId, room.HostName, room.GuestName))
+                
+                ActiveSessions[room.HostId] = room.GuestId
+                ActiveSessions[room.GuestId] = room.HostId
+                
+                room.NextUnknownTime = tick() + math.random(15, 30)
+                
+                notifyClient(player, "Connected", room.HostName, tostring(room.HostId))
+                notifyClient(partner, "Connected", room.GuestName, tostring(room.GuestId))
+                
+                RoomListRequest:FireAllClients("Update")
+            end
+        else
+            -- No hay salas disponibles, crear una nueva automáticamente
+            local newId = getRoomId()
+            Rooms[newId] = {
+                HostId = userId,
+                HostName = playerName,
+                GuestId = nil,
+                GuestName = nil,
+                Status = "Waiting",
+                CreatedAt = tick(),
+                NextUnknownTime = 0
+            }
+            PlayerRoomMap[userId] = newId
+            print(string.format("[SERVER] Auto-sala creada: %s por %s (QuickJoin)", newId, playerName))
+            notifyClient(player, "RoomStatusUpdate", "HostWaiting", playerName)
+            RoomListRequest:FireAllClients("Update")
+        end
+        
+    elseif action == "Create" then
         local newId = getRoomId()
         Rooms[newId] = {
         HostId = userId,
@@ -190,8 +264,8 @@ RoomAction.OnServerEvent:Connect(function(player, action, roomId)
             ActiveSessions[room.HostId] = room.GuestId
             ActiveSessions[room.GuestId] = room.HostId
             
-            -- Inicializar timer de terror
-            room.NextUnknownTime = tick() + math.random(25, 45) 
+            -- Inicializar timer de terror - MÁS FRECUENTE
+            room.NextUnknownTime = tick() + math.random(15, 30) -- Mensajes más frecuentes 
             
             -- Notificar a ambos clientes que están conectados. 
             -- message = UserID del compañero
@@ -277,8 +351,8 @@ local function handleUnknownMessages(room)
         notifyClient(player1, "NewMessage", "Desconocido", message)
         notifyClient(player2, "NewMessage", "Desconocido", message)
         
-        -- Restablecer temporizador con nuevo intervalo
-        local duration = math.random(25, 45)
+        -- Restablecer temporizador con nuevo intervalo - MÁS AGRESIVO
+        local duration = math.random(10, 25) -- Intervalos más cortos para más terror
         room.NextUnknownTime = tick() + duration
     end
 end
